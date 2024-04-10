@@ -1,0 +1,44 @@
+import pygame
+
+SCREEN_SIZE = [1280, 720]
+TILE_SIZE = int(SCREEN_SIZE[0] / 32)
+SCREEN_SIZE_IN_TILES = [int(SCREEN_SIZE[0] / TILE_SIZE), int(SCREEN_SIZE[1] / TILE_SIZE)]
+
+
+SCREEN_WIDTH, SCREEN_HEIGHT = SCREEN_SIZE
+
+COLORS = {
+    "BackGround": '#281d2f',
+    "LogoText": '#bf8f30',
+
+    "ButtonMain": '#281d2f',
+    "ButtonSecond": '#33233C',
+    "ButtonText": '#bf8f30',
+    "ButtonBorder": '#241A2A',
+
+
+    "Text": '#bf8f30',
+}
+
+PATHS = {
+    "Character": {
+        "idle": "../graphics/character/basic/idle",
+        "jump": "../graphics/character/basic/jump",
+        "run": "../graphics/character/basic/run",
+    },
+
+    "Textures": {
+        "platforms": "../graphics/platforms",
+        "blocks": "../graphics/blocks/blocks.png",
+        "grass": "../graphics/grass",
+    }
+}
+
+
+
+# Menu
+MENU_Y_BLOCKS_SPEED = 1
+FONT_NAME = 'cambria'
+
+# Level
+LEVEL_Y_BLOCKS_SPEED = 1
