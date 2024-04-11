@@ -1,7 +1,7 @@
 from random import choice, randint
 from settings import *
 
-from class_button import Button
+from class_button import Button, ImageButton
 from class_tile import Tile, MovingTile
 from class_text import MovingText
 
@@ -12,10 +12,18 @@ class Menu:
         self.game = game
         self.screen = self.game.screen
 
+        if self.game.music_status:
+            self.game.play_music()
+
         # Groups
         self.texts = pygame.sprite.Group()
         self.tiles = pygame.sprite.Group()
         self.buttons = pygame.sprite.Group()
+        self.sound_button = None
+
+        # LogoVariables
+        self.logo_image = None
+        self.logo_rect = None
 
         self.setup()
 
@@ -23,7 +31,7 @@ class Menu:
         # -------------------------- Logo --------------------------
         self.logo_image = pygame.font.SysFont(FONT_NAME, int(TILE_SIZE * 1.8)).render("Math Up!", True,
                                                                                       COLORS['LogoText'])
-        self.logo_rect = self.logo_image.get_rect(center=(TILE_SIZE * 26.5, TILE_SIZE * 4))
+        self.logo_rect = self.logo_image.get_rect(center=(TILE_SIZE * 26.5, TILE_SIZE * 3))
 
         # ----------------------- Decor --------------------------
         for i in range(21, SCREEN_SIZE_IN_TILES[0]):
@@ -57,7 +65,6 @@ class Menu:
                 pos=[TILE_SIZE * int(SCREEN_WIDTH / TILE_SIZE - 1), TILE_SIZE * i],
                 groups=self.tiles
             )
-
 
         # ------------------------- Moving -------------------------
         # Tiles
@@ -111,7 +118,6 @@ class Menu:
                 groups=self.texts
             )
 
-
             MovingText(
                 text=str(exersice[3]),
                 text_size=60,
@@ -119,7 +125,7 @@ class Menu:
                 y_change=MENU_Y_BLOCKS_SPEED,
                 text_color=COLORS["Text"],
                 groups=self.texts
-                )
+            )
             MovingText(
                 text=str(exersice[4]),
                 text_size=60,
@@ -129,11 +135,10 @@ class Menu:
                 groups=self.texts
             )
 
-
         # -------------------------- Buttons --------------------------
         # Play
         Button(
-            pos=(TILE_SIZE * 26.5, TILE_SIZE * 7)
+            pos=(TILE_SIZE * 26.5, TILE_SIZE * 5.5)
             , main_color=COLORS["ButtonMain"]
             , second_color=COLORS["ButtonSecond"]
             , text_color=COLORS["ButtonText"]
@@ -145,23 +150,21 @@ class Menu:
             , func=self.game.go_to_level
         )
 
-        # Settings
-        Button(
-            pos=(TILE_SIZE * 26.5, TILE_SIZE * 9.5)
+        # Sound Button
+        self.sound_button = ImageButton(
+            pos=(TILE_SIZE * 29.5, TILE_SIZE * 15.5)
             , main_color=COLORS["ButtonMain"]
             , second_color=COLORS["ButtonSecond"]
-            , text_color=COLORS["ButtonText"]
             , border_color=COLORS["ButtonBorder"]
-            , text="Settings"
-            , font=pygame.font.SysFont('cambria', int(TILE_SIZE * 1.4))
-            , size=(TILE_SIZE * 5.3, TILE_SIZE * 2)
+            , image_path=PATHS["Icons"]["sound"]
+            , size=(TILE_SIZE * 2, TILE_SIZE * 2)
             , group=self.buttons
-            , func=None
+            , func=self.switch_music
         )
 
         # Exit
         Button(
-            pos=(TILE_SIZE * 26.5, TILE_SIZE * 12)
+            pos=(TILE_SIZE * 25, TILE_SIZE * 15.5)
             , main_color=COLORS["ButtonMain"]
             , second_color=COLORS["ButtonSecond"]
             , text_color=COLORS["ButtonText"]
@@ -170,7 +173,7 @@ class Menu:
             , font=pygame.font.SysFont('cambria', int(TILE_SIZE * 1.4))
             , size=(TILE_SIZE * 5.3, TILE_SIZE * 2)
             , group=self.buttons
-            , func=None
+            , func=self.game.exit
         )
 
     def create_ex(self):
@@ -219,6 +222,13 @@ class Menu:
 
         return [x, y, action_txt, first, second]
 
+    def switch_music(self):
+        if self.game.music_status:
+            self.game.stop_music()
+        else:
+            self.game.play_music()
+
+
     def event_loop(self):
         self.update()
         for event in pygame.event.get():
@@ -237,10 +247,10 @@ class Menu:
             if TILE_SIZE * (SCREEN_SIZE_IN_TILES[1] + int(SCREEN_SIZE_IN_TILES[1] / 3) - 1) < sprite.rect.y:
                 sprite.rect.y = -TILE_SIZE
 
-
         self.texts.update()
         for sprite in self.texts.sprites():
-            if TILE_SIZE * (SCREEN_SIZE_IN_TILES[1] + int(SCREEN_SIZE_IN_TILES[1] / 3) - 1) - TILE_SIZE * 1 <= sprite.rect.y:
+            if TILE_SIZE * (
+                    SCREEN_SIZE_IN_TILES[1] + int(SCREEN_SIZE_IN_TILES[1] / 3) - 1) - TILE_SIZE * 1 <= sprite.rect.y:
                 sprite.rect.y = -TILE_SIZE * 2
 
         self.buttons.update(pygame.mouse.get_pos())
@@ -248,10 +258,12 @@ class Menu:
     def run(self):
         self.screen.fill(COLORS["BackGround"])
 
-
         self.screen.blit(self.logo_image, self.logo_rect)
         pygame.draw.line(self.screen, '#bf8f30', self.logo_rect.bottomleft, self.logo_rect.bottomright, 2)
 
         self.tiles.draw(self.screen)
         self.texts.draw(self.screen)
         self.buttons.draw(self.screen)
+
+        if not self.game.music_status:
+            pygame.draw.line(self.screen, COLORS["Text"], self.sound_button.rect.topright, self.sound_button.rect.bottomleft, 5)

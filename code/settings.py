@@ -18,6 +18,8 @@ COLORS = {
 
 
     "Text": '#bf8f30',
+    "TextCorrect": '#43F623',
+    "TextError": '#FF0000'
 }
 
 PATHS = {
@@ -31,6 +33,10 @@ PATHS = {
         "platforms": "../graphics/platforms",
         "blocks": "../graphics/blocks/blocks.png",
         "grass": "../graphics/grass",
+    },
+
+    "Icons": {
+        "sound": "../graphics/icons/sound_icon.png"
     }
 }
 
@@ -41,4 +47,13 @@ MENU_Y_BLOCKS_SPEED = 1
 FONT_NAME = 'cambria'
 
 # Level
+LEVEL_Y_BLOCKS_SPEED = {
+    "Easy": 1,
+    "Medium": 1,
+    "Hard": 1,
+}
 LEVEL_Y_BLOCKS_SPEED = 1
+PLAYER_SPEED = 5
+GRAVITY = 0.2
+JUMP_SPEED = -10
+ANIMATION_SPEED = 0.08

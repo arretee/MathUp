@@ -2,20 +2,23 @@ import pygame
 from random import choice, randint
 
 from class_player import Player
-from class_text import MovingText
+from class_text import MovingText, Text
 from class_tile import Tile, MovingTile
+from class_button import Button, ImageButton
 
 from settings import *
 
 
 class Level:
     def __init__(self, game):
+        # Basic
         self.game = game
         self.screen = self.game.screen
 
         self.started = False
 
-        self.player = Player()
+        # Groups
+        self.buttons = pygame.sprite.Group()
 
         self.collide_sprites = pygame.sprite.Group()
         self.visible_sprites = pygame.sprite.Group()
@@ -23,9 +26,34 @@ class Level:
         self.sprite_to_move = pygame.sprite.Group()
         self.start_platform_sprites = pygame.sprite.Group()
 
+        # Sounds
+        self.sound_button = None
+
+
+        # Exercises
         self.exercises = []
 
         self.setup()
+        self.current_ex_to_jump = self.exercises[2]
+        self.wait_mode = False
+
+        # Game Over
+        self.game_over_status = False
+        self.game_over_screen = None
+
+
+        # Statistic
+        self.score = 0
+        self.score_view = Text(f"Score : {self.score}", 70, (TILE_SIZE * 23.5, TILE_SIZE * 2), COLORS["Text"],
+                               self.visible_sprites)
+        self.lives = 3
+        self.lives_view = Text(f"Lives : {self.lives}", 40, (TILE_SIZE * 23.5, TILE_SIZE * 6), COLORS["Text"],
+                               self.visible_sprites)
+
+
+        # Player
+        self.player = Player(self.game, (TILE_SIZE * 13.5, TILE_SIZE * 11), self.collide_sprites)
+
 
     def setup(self):
         # ----------------------- Decor --------------------------
@@ -129,7 +157,7 @@ class Level:
             )
             ex.append(
                 MovingText(
-                    text=str(exersice[3]),
+                    text=str(exersice[3]) + ("     " if len(str(exersice[3])) == 1 else "     "),
                     text_size=60,
                     start_pos=[TILE_SIZE * 8, -2 * TILE_SIZE + TILE_SIZE * i],
                     y_change=MENU_Y_BLOCKS_SPEED,
@@ -140,9 +168,9 @@ class Level:
 
             ex.append(
                 MovingText(
-                    text=str(exersice[4]),
+                    text=("     " if len(str(exersice[4])) == 1 else "   ") + str(exersice[4]),
                     text_size=60,
-                    start_pos=[TILE_SIZE * 17, -2 * TILE_SIZE + TILE_SIZE * i],
+                    start_pos=[TILE_SIZE * 16, -2 * TILE_SIZE + TILE_SIZE * i],
                     y_change=MENU_Y_BLOCKS_SPEED,
                     text_color=COLORS["Text"],
                     groups=[self.visible_sprites, self.sprite_to_move]
@@ -150,6 +178,39 @@ class Level:
             )
 
             self.exercises.append(ex)
+
+        # ------------------------ Buttons ------------------------
+        # Back
+        Button(
+            pos=(TILE_SIZE * 25, TILE_SIZE * 15.5)
+            , main_color=COLORS["ButtonMain"]
+            , second_color=COLORS["ButtonSecond"]
+            , text_color=COLORS["ButtonText"]
+            , border_color=COLORS["ButtonBorder"]
+            , text="Back"
+            , font=pygame.font.SysFont('cambria', int(TILE_SIZE * 1.4))
+            , size=(TILE_SIZE * 5.3, TILE_SIZE * 2)
+            , group=self.buttons
+            , func=self.game.go_to_menu
+        )
+
+        # Sound Button
+        self.sound_button = ImageButton(
+            pos=(TILE_SIZE * 29.5, TILE_SIZE * 15.5)
+            , main_color=COLORS["ButtonMain"]
+            , second_color=COLORS["ButtonSecond"]
+            , border_color=COLORS["ButtonBorder"]
+            , image_path=PATHS["Icons"]["sound"]
+            , size=(TILE_SIZE * 2, TILE_SIZE * 2)
+            , group=self.buttons
+            , func=self.switch_music
+        )
+
+    def switch_music(self):
+        if self.game.music_status:
+            self.game.stop_music()
+        else:
+            self.game.play_music()
 
     def create_ex_basic(self):
         x = randint(1, 10)
@@ -180,7 +241,7 @@ class Level:
             if incorrect == first:
                 second = first + randint(1, 20)
             else:
-                second = first + randint(-20, 20)
+                second = incorrect
         else:
             if action == 1:
                 second = x + y
@@ -193,10 +254,21 @@ class Level:
             if incorrect == second:
                 first = second + randint(1, 20)
             else:
-                first = second + randint(-20, 20)
+                first = incorrect
 
         return [x, y, action_txt, first, second]
 
+    def set_answer_and_score(self, txt_class, status):
+        if status:
+            self.score += 1
+        else:
+            self.lives -= 1
+            if self.lives == -1:
+                self.game_over()
+
+        self.score_view.change_text(f"Score : {self.score}")
+        self.lives_view.change_text(f"Lives : {self.lives}")
+        txt_class.change_color_to(COLORS["TextCorrect"] if status else COLORS["TextError"])
 
     def add_new_ex(self):
         exersice = self.create_ex_basic()
@@ -214,7 +286,7 @@ class Level:
         )
         ex.append(
             MovingText(
-                text=str(exersice[3]),
+                text=str(exersice[3]) + ("    " if len(str(exersice[3])) == 1 else "     "),
                 text_size=60,
                 start_pos=[TILE_SIZE * 8, -2 * TILE_SIZE],
                 y_change=MENU_Y_BLOCKS_SPEED,
@@ -225,9 +297,9 @@ class Level:
 
         ex.append(
             MovingText(
-                text=str(exersice[4]),
+                text=("     " if len(str(exersice[4])) == 1 else "   ") + str(exersice[4]),
                 text_size=60,
-                start_pos=[TILE_SIZE * 17, -2 * TILE_SIZE],
+                start_pos=[TILE_SIZE * 16, -2 * TILE_SIZE],
                 y_change=MENU_Y_BLOCKS_SPEED,
                 text_color=COLORS["Text"],
                 groups=[self.visible_sprites, self.sprite_to_move]
@@ -236,45 +308,130 @@ class Level:
 
         self.exercises.append(ex)
 
-
     def event_loop(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.game.running = False
+        events = pygame.event.get()
 
-            if event.type == pygame.KEYDOWN:
-                self.started = True
+        if not self.game_over_status:
+            self.player.update(events)
+
+            for event in events:
+                if event.type == pygame.QUIT:
+                    self.game.running = False
+
+                if event.type == pygame.KEYDOWN:
+                    self.started = True
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    for sprite in self.buttons.sprites():
+                        if sprite.rect.collidepoint(mouse_pos):
+                            sprite.call_function()
+
+        else:
+            for event in events:
+                if event.type == pygame.QUIT:
+                    self.game.running = False
+
+                if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    self.game.restart_level()
+
+    def game_over(self):
+        self.game_over_status = True
+        self.game_over_screen = self.screen.copy()
+
+        # dark background
+        darken_percent = 0.50
+        dark = pygame.Surface(self.game_over_screen.get_size()).convert_alpha()
+        dark.fill((0, 0, 0, darken_percent * 255))
+        self.game_over_screen.blit(dark, (0, 0))
+
+        # Text
+        group = pygame.sprite.Group()
+        txt = Text(
+            text="Press any button to restart",
+            text_size=80,
+            start_pos=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2),
+            text_color=COLORS["Text"],
+            groups=group,
+            center_pos=True
+        )
+
+        group.draw(self.game_over_screen)
 
     def run(self):
-        # Update
-        if self.started:
-            self.sprite_to_move.update()
 
-            for sprite in self.sprite_to_move.sprites():
-                if type(sprite) != MovingText:
-                    if TILE_SIZE * (SCREEN_SIZE_IN_TILES[1] + int(SCREEN_SIZE_IN_TILES[1] / 3) - 1) < sprite.rect.y:
-                        sprite.rect.y = -TILE_SIZE
+        if not self.game_over_status:
+            # Update
+            self.buttons.update(pygame.mouse.get_pos())
 
-                else:
-                    if TILE_SIZE * (SCREEN_SIZE_IN_TILES[1] + int(SCREEN_SIZE_IN_TILES[1] / 3) - 1) - TILE_SIZE * 1 <= sprite.rect.y:
+            if self.started:
+                self.sprite_to_move.update()
+
+                for sprite in self.sprite_to_move.sprites():
+                    if type(sprite) != MovingText:
+                        if TILE_SIZE * (SCREEN_SIZE_IN_TILES[1] + int(SCREEN_SIZE_IN_TILES[1] / 3) - 1) < sprite.rect.y:
+                            sprite.rect.y = -TILE_SIZE
+
+                    else:
+                        if TILE_SIZE * (SCREEN_SIZE_IN_TILES[1] + int(
+                                SCREEN_SIZE_IN_TILES[1] / 3) - 1) - TILE_SIZE * 1 <= sprite.rect.y:
+                            sprite.kill()
+                            self.exercises[0].remove(sprite)
+
+                        if self.exercises[0] == []:
+                            self.exercises.pop(0)
+                            self.add_new_ex()
+
+                for sprite in self.start_platform_sprites.sprites():
+                    if sprite.rect.y > SCREEN_HEIGHT:
                         sprite.kill()
-                        self.exercises[0].remove(sprite)
+                    else:
+                        break
+
+            # Check answer
+            if not self.wait_mode:
+                for sprite in self.current_ex_to_jump[1:]:
+                    if self.player.rect.colliderect(sprite.rect):
+                        if int(sprite.text) == eval(self.current_ex_to_jump[0].text[0:-2].replace("x", "*")):
+                            self.set_answer_and_score(sprite, True)
+                        else:
+                            self.set_answer_and_score(sprite, False)
+
+                        for index, val in enumerate(self.exercises):
+                            if val == self.current_ex_to_jump:
+                                if len(self.exercises) < index + 1:
+                                    self.current_ex_to_jump = self.exercises[index + 1]
+                                    break
+
+                                else:
+                                    self.wait_mode = True
+                                    break
+
+            # Check if player in wait mode and update the ex
+            if self.wait_mode and self.current_ex_to_jump != self.exercises[-1]:
+                self.wait_mode = False
+                self.current_ex_to_jump = self.exercises[-1]
+
+            # Game Over
+            if self.player.rect.top > SCREEN_HEIGHT:
+                self.game_over()
+
+            # Draw
+            self.screen.fill(COLORS["BackGround"])
+            self.buttons.draw(self.screen)
+
+            # Level
+            self.visible_sprites.draw(self.screen)
+            self.player.draw()
+
+            # Decor
+            pygame.draw.line(self.screen, COLORS["Text"], self.score_view.rect.bottomleft,
+                             self.score_view.rect.bottomright, 3)
+
+            if not self.game.music_status:
+                pygame.draw.line(self.screen, COLORS["Text"], self.sound_button.rect.topright,
+                                 self.sound_button.rect.bottomleft, 5)
 
 
-                    if self.exercises[0] == []:
-                        self.exercises.pop(0)
-                        self.add_new_ex()
-
-
-
-
-            for sprite in self.start_platform_sprites.sprites():
-                if sprite.rect.y > SCREEN_HEIGHT:
-                    sprite.kill()
-                else:
-                    break
-
-        # Draw
-        self.screen.fill(COLORS["BackGround"])
-
-        self.visible_sprites.draw(self.screen)
+        else:
+            self.screen.blit(self.game_over_screen, (0, 0))
