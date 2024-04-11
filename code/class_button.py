@@ -32,7 +32,7 @@ class Button(pygame.sprite.Sprite):
         self.background_rect = self.background_image.get_rect(topleft=(3, 3))
 
         # text
-        self.text_image = self.font.render(self.text, True, self.text_color)
+        self.text_image = self.font.render(str(self.text), True, self.text_color)
         self.text_rect = self.text_image.get_rect(center=(self.size[0] / 2, self.size[1] / 2))
 
         # ------- Draw Button ----------
@@ -116,3 +116,39 @@ class ImageButton(pygame.sprite.Sprite):
             self.image.blit(self.background_image, self.background_rect)  # background
             self.image.blit(self.img, self.img_rect)  # text
             self.status = False
+
+
+
+class SelectButton(Button):
+    def __init__(self, pos, main_color, second_color, text_color, border_color, text, font, size, group, func):
+        super().__init__(pos, main_color, second_color, text_color, border_color, text, font, size, group, func)
+
+        self.selected = False
+
+    def select(self):
+        self.selected = True
+        self.image.fill(self.border_color)  # border
+        self.image.blit(self.background_second_image, self.background_second_rect)  # background
+        self.image.blit(self.text_image, self.text_rect)  # text
+
+    def unselect(self):
+        self.selected = False
+        self.image.fill(self.border_color)  # border
+        self.image.blit(self.background_image, self.background_rect)  # background
+        self.image.blit(self.text_image, self.text_rect)  # text
+
+    def call_function(self):
+        self.func(self)
+
+    def update(self, mouse_pos):
+        if not self.selected:
+            if not self.status and self.rect.collidepoint(mouse_pos):
+                self.image.fill(self.border_color)  # border
+                self.image.blit(self.background_second_image, self.background_second_rect)  # background
+                self.image.blit(self.text_image, self.text_rect)  # text
+                self.status = True
+            elif self.status and not self.rect.collidepoint(mouse_pos):
+                self.image.fill(self.border_color)  # border
+                self.image.blit(self.background_image, self.background_rect)  # background
+                self.image.blit(self.text_image, self.text_rect)  # text
+                self.status = False

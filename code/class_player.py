@@ -34,14 +34,14 @@ class Player(pygame.sprite.Sprite):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 # Jump
-                if event.key == pygame.K_SPACE and self.onGround:
+                if (event.key == pygame.K_SPACE or event.key == pygame.K_UP or event.key == pygame.K_w) and self.onGround:
                     self.jump()
 
         # Movement
-        if keys[pygame.K_a]:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             self.direction.x = -1
             self.facing = "left"
-        elif keys[pygame.K_d]:
+        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             self.direction.x = 1
             self.facing = "right"
         else:
@@ -57,11 +57,11 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         if self.onGround:
             self.onGround = False
-            self.direction.y = JUMP_SPEED
+            self.direction.y = JUMP_SPEED_BY_SPEED[self.game.current_data["Speed"]]
 
     def gravity(self):
         if round(self.direction.y) == 0:
-            self.direction.y = LEVEL_Y_BLOCKS_SPEED
+            self.direction.y = LEVEL_Y_BLOCKS_SPEED[self.game.current_data["Speed"]]
         self.direction.y += GRAVITY
 
     def move(self, speed):

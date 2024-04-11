@@ -48,12 +48,16 @@ FONT_NAME = 'cambria'
 
 # Level
 LEVEL_Y_BLOCKS_SPEED = {
-    "Easy": 1,
-    "Medium": 1,
-    "Hard": 1,
+    1: 1,
+    2: 2,
+    3: 3,
 }
-LEVEL_Y_BLOCKS_SPEED = 1
+
 PLAYER_SPEED = 5
 GRAVITY = 0.2
-JUMP_SPEED = -10
+JUMP_SPEED_BY_SPEED = {
+    1: -10,
+    2: -9,
+    3: -8.5
+}
 ANIMATION_SPEED = 0.08

@@ -16,6 +16,7 @@ class Level:
         self.screen = self.game.screen
 
         self.started = False
+        self.blocks_speed = LEVEL_Y_BLOCKS_SPEED[self.game.current_data["Speed"]]
 
         # Groups
         self.buttons = pygame.sprite.Group()
@@ -31,9 +32,10 @@ class Level:
 
 
         # Exercises
+        self.exercises_diff = self.game.current_data["Difficulty"]
         self.exercises = []
-
         self.setup()
+
         self.current_ex_to_jump = self.exercises[2]
         self.wait_mode = False
 
@@ -96,14 +98,14 @@ class Level:
             MovingTile(
                 image=choice(self.game.textures["Textures"]["blocks"][1:]),
                 pos=[TILE_SIZE * 6, TILE_SIZE * i],
-                y_change=LEVEL_Y_BLOCKS_SPEED,
+                y_change=self.blocks_speed,
                 groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move]
             )
 
             MovingTile(
                 image=choice(self.game.textures["Textures"]["blocks"][1:]),
                 pos=[TILE_SIZE * 20, TILE_SIZE * i],
-                y_change=LEVEL_Y_BLOCKS_SPEED,
+                y_change=self.blocks_speed,
                 groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move]
             )
 
@@ -112,14 +114,14 @@ class Level:
             MovingTile(
                 image=self.game.textures["Textures"]["platforms"][0],
                 pos=[TILE_SIZE * 7, i * TILE_SIZE],
-                y_change=LEVEL_Y_BLOCKS_SPEED,
+                y_change=self.blocks_speed,
                 groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move]
             )
 
             MovingTile(
                 image=self.game.textures["Textures"]["platforms"][2],
                 pos=[TILE_SIZE * 19, i * TILE_SIZE],
-                y_change=LEVEL_Y_BLOCKS_SPEED,
+                y_change=self.blocks_speed,
                 groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move]
             )
 
@@ -127,7 +129,7 @@ class Level:
                 MovingTile(
                     image=self.game.textures["Textures"]["platforms"][1],
                     pos=[TILE_SIZE * j, i * TILE_SIZE],
-                    y_change=LEVEL_Y_BLOCKS_SPEED,
+                    y_change=self.blocks_speed,
                     groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move]
                 )
 
@@ -136,7 +138,7 @@ class Level:
             MovingTile(
                 image=self.game.textures["Textures"]["platforms"][1],
                 pos=[TILE_SIZE * i, SCREEN_SIZE_IN_TILES[1] * TILE_SIZE - TILE_SIZE * 6],
-                y_change=LEVEL_Y_BLOCKS_SPEED,
+                y_change=self.blocks_speed,
                 groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move, self.start_platform_sprites]
             )
 
@@ -144,34 +146,52 @@ class Level:
         for i in [18, 12, 6, 0]:
             exersice = self.create_ex_basic()
             ex = []
-
+            pos1 = [TILE_SIZE, -2 * TILE_SIZE + TILE_SIZE * i] if len(f"{exersice[0]} {exersice[2]} {exersice[1]} =") <= 8 else [
+                TILE_SIZE * 0.25, -2 * TILE_SIZE + TILE_SIZE * i]
             ex.append(
                 MovingText(
                     text=f"{exersice[0]} {exersice[2]} {exersice[1]} = ",
                     text_size=60,
-                    start_pos=[TILE_SIZE, -2 * TILE_SIZE + TILE_SIZE * i],
-                    y_change=MENU_Y_BLOCKS_SPEED,
-                    text_color=COLORS["Text"],
-                    groups=[self.visible_sprites, self.sprite_to_move]
-                )
-            )
-            ex.append(
-                MovingText(
-                    text=str(exersice[3]) + ("     " if len(str(exersice[3])) == 1 else "     "),
-                    text_size=60,
-                    start_pos=[TILE_SIZE * 8, -2 * TILE_SIZE + TILE_SIZE * i],
-                    y_change=MENU_Y_BLOCKS_SPEED,
+                    start_pos=pos1,
+                    y_change=self.blocks_speed,
                     text_color=COLORS["Text"],
                     groups=[self.visible_sprites, self.sprite_to_move]
                 )
             )
 
+            if len(str(exersice[3])) == 1:
+                st = "     "
+            elif len(str(exersice[3])) == 2:
+                st = "   "
+            elif len(str(exersice[3])) == 3:
+                st = " "
+            else:
+                st = ""
             ex.append(
                 MovingText(
-                    text=("     " if len(str(exersice[4])) == 1 else "   ") + str(exersice[4]),
+                    text=str(exersice[3]) + st,
+                    text_size=60,
+                    start_pos=[TILE_SIZE * 8, -2 * TILE_SIZE + TILE_SIZE * i],
+                    y_change=self.blocks_speed,
+                    text_color=COLORS["Text"],
+                    groups=[self.visible_sprites, self.sprite_to_move]
+                )
+            )
+
+            if len(str(exersice[4])) == 1:
+                st = "     "
+            elif len(str(exersice[4])) == 2:
+                st = "   "
+            elif len(str(exersice[4])) == 3:
+                st = " "
+            else:
+                st = ""
+            ex.append(
+                MovingText(
+                    text=st + str(exersice[4]),
                     text_size=60,
                     start_pos=[TILE_SIZE * 16, -2 * TILE_SIZE + TILE_SIZE * i],
-                    y_change=MENU_Y_BLOCKS_SPEED,
+                    y_change=self.blocks_speed,
                     text_color=COLORS["Text"],
                     groups=[self.visible_sprites, self.sprite_to_move]
                 )
@@ -212,52 +232,6 @@ class Level:
         else:
             self.game.play_music()
 
-    def create_ex_basic(self):
-        x = randint(1, 10)
-        y = randint(1, 10)
-
-        action = randint(1, 3)
-        action_txt = ""
-        if action == 1:
-            action_txt = "+"
-        if action == 2:
-            action_txt = "-"
-        if action == 3:
-            action_txt = "x"
-
-        if action == 2:
-            if y > x:
-                x, y = y, x
-
-        if randint(1, 2) == 2:
-            if action == 1:
-                first = x + y
-            elif action == 2:
-                first = x - y
-            else:
-                first = x * y
-
-            incorrect = first + randint(-20, 20)
-            if incorrect == first:
-                second = first + randint(1, 20)
-            else:
-                second = incorrect
-        else:
-            if action == 1:
-                second = x + y
-            elif action == 2:
-                second = x - y
-            else:
-                second = x * y
-
-            incorrect = second + randint(-20, 20)
-            if incorrect == second:
-                first = second + randint(1, 20)
-            else:
-                first = incorrect
-
-        return [x, y, action_txt, first, second]
-
     def set_answer_and_score(self, txt_class, status):
         if status:
             self.score += 1
@@ -270,37 +244,188 @@ class Level:
         self.lives_view.change_text(f"Lives : {self.lives}")
         txt_class.change_color_to(COLORS["TextCorrect"] if status else COLORS["TextError"])
 
+    def create_ex_basic(self):
+        if self.exercises_diff == 1:
+            x = randint(1, 10)
+            y = randint(1, 10)
+
+            action = randint(1, 2)
+            action_txt = ""
+            if action == 1:
+                action_txt = "+"
+            if action == 2:
+                action_txt = "-"
+
+            if action == 2:
+                if y > x:
+                    x, y = y, x
+
+            if randint(1, 2) == 2:
+                if action == 1:
+                    first = x + y
+                elif action == 2:
+                    first = x - y
+                else:
+                    first = x * y
+
+                incorrect = first + randint(-5, 5)
+                if incorrect == first or incorrect < 0:
+                    second = first + randint(1, 5)
+                else:
+                    second = incorrect
+            else:
+                if action == 1:
+                    second = x + y
+                elif action == 2:
+                    second = x - y
+                else:
+                    second = x * y
+
+                incorrect = second + randint(-5, 5)
+                if incorrect == second or incorrect < 0:
+                    first = second + randint(1, 5)
+                else:
+                    first = incorrect
+
+            return [x, y, action_txt, first, second]
+
+        elif self.exercises_diff == 2:
+            x = randint(1, 10)
+            y = randint(1, 10)
+
+            action = randint(1, 7)
+            action_txt = ""
+            if action == 1:
+                action_txt = "+"
+            if action == 2:
+                action_txt = "-"
+            if action >= 3:
+                action_txt = "x"
+
+            if action == 2:
+                if y > x:
+                    x, y = y, x
+
+            if randint(1, 2) == 2:
+                if action == 1:
+                    first = x + y
+                elif action == 2:
+                    first = x - y
+                else:
+                    first = x * y
+
+                incorrect = first + randint(-20, 20)
+                if incorrect == first or incorrect < 0:
+                    second = first + randint(1, 20)
+                else:
+                    second = incorrect
+            else:
+                if action == 1:
+                    second = x + y
+                elif action == 2:
+                    second = x - y
+                else:
+                    second = x * y
+
+                incorrect = second + randint(-20, 20)
+                if incorrect == second or incorrect < 0:
+                    first = second + randint(1, 20)
+                else:
+                    first = incorrect
+
+            return [x, y, action_txt, first, second]
+
+        else:
+            x = randint(1, 50)
+            y = randint(1, 30)
+
+            action = randint(1, 6)
+            action_txt = ""
+            if action == 1:
+                action_txt = "+"
+            if action == 2:
+                action_txt = "-"
+            if action >= 3:
+                action_txt = "x"
+
+            if randint(1, 2) == 2:
+                if action == 1:
+                    first = x + y
+                elif action == 2:
+                    first = x - y
+                else:
+                    first = x * y
+
+                incorrect = first + randint(-50, 50)
+                if incorrect == first:
+                    second = first + randint(1, 50)
+                else:
+                    second = incorrect
+            else:
+                if action == 1:
+                    second = x + y
+                elif action == 2:
+                    second = x - y
+                else:
+                    second = x * y
+
+                incorrect = second + randint(-50, 50)
+                if incorrect == second:
+                    first = second + randint(1, 50)
+                else:
+                    first = incorrect
+
+            return [x, y, action_txt, first, second]
+
     def add_new_ex(self):
         exersice = self.create_ex_basic()
         ex = []
 
+        pos1 = [TILE_SIZE, -2 * TILE_SIZE] if len(f"{exersice[0]} {exersice[2]} {exersice[1]} =") <= 8 else [TILE_SIZE * 0.25, -2 * TILE_SIZE]
         ex.append(
             MovingText(
                 text=f"{exersice[0]} {exersice[2]} {exersice[1]} = ",
                 text_size=60,
-                start_pos=[TILE_SIZE, -2 * TILE_SIZE],
-                y_change=MENU_Y_BLOCKS_SPEED,
-                text_color=COLORS["Text"],
-                groups=[self.visible_sprites, self.sprite_to_move]
-            )
-        )
-        ex.append(
-            MovingText(
-                text=str(exersice[3]) + ("    " if len(str(exersice[3])) == 1 else "     "),
-                text_size=60,
-                start_pos=[TILE_SIZE * 8, -2 * TILE_SIZE],
-                y_change=MENU_Y_BLOCKS_SPEED,
+                start_pos=pos1,
+                y_change=self.blocks_speed,
                 text_color=COLORS["Text"],
                 groups=[self.visible_sprites, self.sprite_to_move]
             )
         )
 
+        if len(str(exersice[3])) == 1:
+            st = "     "
+        elif len(str(exersice[3])) == 2:
+            st = "   "
+        elif len(str(exersice[3])) == 3:
+            st = " "
+        else:
+            st = ""
         ex.append(
             MovingText(
-                text=("     " if len(str(exersice[4])) == 1 else "   ") + str(exersice[4]),
+                text=str(exersice[3]) + st,
+                text_size=60,
+                start_pos=[TILE_SIZE * 8, -2 * TILE_SIZE],
+                y_change=self.blocks_speed,
+                text_color=COLORS["Text"],
+                groups=[self.visible_sprites, self.sprite_to_move]
+            )
+        )
+
+        if len(str(exersice[4])) == 1:
+            st = "     "
+        elif len(str(exersice[4])) == 2:
+            st = "   "
+        elif len(str(exersice[4])) == 3:
+            st = " "
+        else:
+            st = ""
+        ex.append(
+            MovingText(
+                text=st + str(exersice[4]),
                 text_size=60,
                 start_pos=[TILE_SIZE * 16, -2 * TILE_SIZE],
-                y_change=MENU_Y_BLOCKS_SPEED,
+                y_change=self.blocks_speed,
                 text_color=COLORS["Text"],
                 groups=[self.visible_sprites, self.sprite_to_move]
             )

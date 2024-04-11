@@ -1,9 +1,9 @@
 from random import choice, randint
 from settings import *
 
-from class_button import Button, ImageButton
+from class_button import Button, ImageButton, SelectButton
 from class_tile import Tile, MovingTile
-from class_text import MovingText
+from class_text import MovingText, Text
 
 
 class Menu:
@@ -19,19 +19,29 @@ class Menu:
         self.texts = pygame.sprite.Group()
         self.tiles = pygame.sprite.Group()
         self.buttons = pygame.sprite.Group()
+
+        self.difficulty_buttons = pygame.sprite.Group()
+        self.speed_buttons = pygame.sprite.Group()
+
         self.sound_button = None
 
-        # LogoVariables
-        self.logo_image = None
-        self.logo_rect = None
+        # Text Variables
+        self.logo_text = None
+        self.diff_text = None
+        self.speed_text = None
 
         self.setup()
 
     def setup(self):
         # -------------------------- Logo --------------------------
-        self.logo_image = pygame.font.SysFont(FONT_NAME, int(TILE_SIZE * 1.8)).render("Math Up!", True,
-                                                                                      COLORS['LogoText'])
-        self.logo_rect = self.logo_image.get_rect(center=(TILE_SIZE * 26.5, TILE_SIZE * 3))
+        self.logo_text = Text(
+            text="Math Up!",
+            text_size=72,
+            start_pos=(TILE_SIZE * 26.5, TILE_SIZE * 2.5),
+            text_color=COLORS["LogoText"],
+            groups=self.texts,
+            center_pos=True
+        )
 
         # ----------------------- Decor --------------------------
         for i in range(21, SCREEN_SIZE_IN_TILES[0]):
@@ -138,7 +148,7 @@ class Menu:
         # -------------------------- Buttons --------------------------
         # Play
         Button(
-            pos=(TILE_SIZE * 26.5, TILE_SIZE * 5.5)
+            pos=(TILE_SIZE * 26.5, TILE_SIZE * 5)
             , main_color=COLORS["ButtonMain"]
             , second_color=COLORS["ButtonSecond"]
             , text_color=COLORS["ButtonText"]
@@ -175,6 +185,128 @@ class Menu:
             , group=self.buttons
             , func=self.game.exit
         )
+
+
+
+        # ------------------------ Difficulty Text -------------------------------
+        self.diff_text = Text(
+            text="Difficulty",
+            text_size=40,
+            start_pos=(TILE_SIZE * 26.5, TILE_SIZE * 7),
+            text_color=COLORS["LogoText"],
+            groups=self.texts,
+            center_pos=True
+        )
+
+        # ----------------------- Difficulty Buttons -----------------------------
+        b1 = SelectButton(
+            pos=(TILE_SIZE * 23.5, TILE_SIZE * 9)
+            , main_color=COLORS["ButtonMain"]
+            , second_color=COLORS["ButtonSecond"]
+            , text_color=COLORS["ButtonText"]
+            , border_color=COLORS["ButtonBorder"]
+            , text="Easy"
+            , font=pygame.font.SysFont('cambria', int(TILE_SIZE * 1.2))
+            , size=(TILE_SIZE * 2.75, TILE_SIZE * 2)
+            , group=(self.buttons, self.difficulty_buttons)
+            , func=self.switch_difficulty
+        )
+
+        if self.game.current_data["Difficulty"] == 1:
+            b1.select()
+
+        b2 = SelectButton(
+            pos=(TILE_SIZE * 26.5, TILE_SIZE * 9)
+            , main_color=COLORS["ButtonMain"]
+            , second_color=COLORS["ButtonSecond"]
+            , text_color=COLORS["ButtonText"]
+            , border_color=COLORS["ButtonBorder"]
+            , text="Mid"
+            , font=pygame.font.SysFont('cambria', int(TILE_SIZE * 1.2))
+            , size=(TILE_SIZE * 2.75, TILE_SIZE * 2)
+            , group=(self.buttons, self.difficulty_buttons)
+            , func=self.switch_difficulty
+        )
+        if self.game.current_data["Difficulty"] == 2:
+            b2.select()
+
+        b3 = SelectButton(
+            pos=(TILE_SIZE * 29.5, TILE_SIZE * 9)
+            , main_color=COLORS["ButtonMain"]
+            , second_color=COLORS["ButtonSecond"]
+            , text_color=COLORS["ButtonText"]
+            , border_color=COLORS["ButtonBorder"]
+            , text="Hard"
+            , font=pygame.font.SysFont('cambria', int(TILE_SIZE * 1.2))
+            , size=(TILE_SIZE * 2.75, TILE_SIZE * 2)
+            , group=(self.buttons, self.difficulty_buttons)
+            , func=self.switch_difficulty
+        )
+
+        if self.game.current_data["Difficulty"] == 3:
+            b3.select()
+
+
+
+
+
+        # ------------------------ Speed Text -------------------------------
+        self.speed_text = Text(
+            text="Speed",
+            text_size=40,
+            start_pos=(TILE_SIZE * 26.5, TILE_SIZE * 11),
+            text_color=COLORS["LogoText"],
+            groups=self.texts,
+            center_pos=True
+        )
+
+        # ----------------------- Speed Buttons -----------------------------
+        b1 = SelectButton(
+            pos=(TILE_SIZE * 23.5, TILE_SIZE * 13)
+            , main_color=COLORS["ButtonMain"]
+            , second_color=COLORS["ButtonSecond"]
+            , text_color=COLORS["ButtonText"]
+            , border_color=COLORS["ButtonBorder"]
+            , text="Slow"
+            , font=pygame.font.SysFont('cambria', int(TILE_SIZE * 1.2))
+            , size=(TILE_SIZE * 2.75, TILE_SIZE * 2)
+            , group=(self.buttons, self.speed_buttons)
+            , func=self.switch_speed
+        )
+        if self.game.current_data["Speed"] == 1:
+            b1.select()
+
+        b2 = SelectButton(
+            pos=(TILE_SIZE * 26.5, TILE_SIZE * 13)
+            , main_color=COLORS["ButtonMain"]
+            , second_color=COLORS["ButtonSecond"]
+            , text_color=COLORS["ButtonText"]
+            , border_color=COLORS["ButtonBorder"]
+            , text="Mid"
+            , font=pygame.font.SysFont('cambria', int(TILE_SIZE * 1.2))
+            , size=(TILE_SIZE * 2.75, TILE_SIZE * 2)
+            , group=(self.buttons, self.speed_buttons)
+            , func=self.switch_speed
+        )
+        if self.game.current_data["Speed"] == 2:
+            b2.select()
+
+        b3 = SelectButton(
+            pos=(TILE_SIZE * 29.5, TILE_SIZE * 13)
+            , main_color=COLORS["ButtonMain"]
+            , second_color=COLORS["ButtonSecond"]
+            , text_color=COLORS["ButtonText"]
+            , border_color=COLORS["ButtonBorder"]
+            , text="Fast"
+            , font=pygame.font.SysFont('cambria', int(TILE_SIZE * 1.2))
+            , size=(TILE_SIZE * 2.75, TILE_SIZE * 2)
+            , group=(self.buttons, self.speed_buttons)
+            , func=self.switch_speed
+        )
+        if self.game.current_data["Speed"] == 3:
+            b3.select()
+
+
 
     def create_ex(self):
         x = randint(1, 10)
@@ -228,6 +360,42 @@ class Menu:
         else:
             self.game.play_music()
 
+    def switch_difficulty(self, select_button):
+        if select_button.text == "Easy":
+            diff = 1
+        elif select_button.text == "Mid":
+            diff = 2
+        else:
+            diff = 3
+
+
+
+        for sprite in self.difficulty_buttons:
+            if sprite.text != select_button.text:
+                sprite.unselect()
+            else:
+                sprite.select()
+
+        self.game.current_data["Difficulty"] = diff
+
+
+
+    def switch_speed(self, select_button):
+        if select_button.text == "Slow":
+            speed = 1
+        elif select_button.text == "Mid":
+            speed = 2
+        else:
+            speed = 3
+
+        for sprite in self.speed_buttons:
+            if sprite.text != select_button.text:
+                sprite.unselect()
+            else:
+                sprite.select()
+
+        self.game.current_data["Speed"] = speed
+
 
     def event_loop(self):
         self.update()
@@ -258,12 +426,18 @@ class Menu:
     def run(self):
         self.screen.fill(COLORS["BackGround"])
 
-        self.screen.blit(self.logo_image, self.logo_rect)
-        pygame.draw.line(self.screen, '#bf8f30', self.logo_rect.bottomleft, self.logo_rect.bottomright, 2)
+        # Line Under The logo
+        pygame.draw.line(self.screen, '#bf8f30', self.logo_text.rect.bottomleft, self.logo_text.rect.bottomright, 2)
+        # Line Under The Difficulty text
+        pygame.draw.line(self.screen, '#bf8f30', self.diff_text.rect.bottomleft, self.diff_text.rect.bottomright, 2)
+        # Line Under The Speed text
+        pygame.draw.line(self.screen, '#bf8f30', self.speed_text.rect.bottomleft, self.speed_text.rect.bottomright, 2)
 
+        # Groups
         self.tiles.draw(self.screen)
         self.texts.draw(self.screen)
         self.buttons.draw(self.screen)
 
+        # Music line (Off / On)
         if not self.game.music_status:
             pygame.draw.line(self.screen, COLORS["Text"], self.sound_button.rect.topright, self.sound_button.rect.bottomleft, 5)

@@ -24,7 +24,15 @@ class Game:
 
         self.textures = import_images()
         self.running = True
+
+
+        self.current_data = {
+            "Difficulty": 1,
+            "Speed": 1
+        }
         self.window = Menu(self)
+
+
 
 
     def run(self):
