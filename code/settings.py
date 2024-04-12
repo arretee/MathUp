@@ -19,7 +19,11 @@ COLORS = {
 
     "Text": '#bf8f30',
     "TextCorrect": '#43F623',
-    "TextError": '#FF0000'
+    "TextError": '#FF0000',
+
+
+    "Particles Correct": "#6DFF2F",
+    "Particles Error": "#F01010",
 }
 
 PATHS = {

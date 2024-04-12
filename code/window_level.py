@@ -30,6 +30,8 @@ class Level:
         # Sounds
         self.sound_button = None
 
+        # Particles
+        self.particles = []
 
         # Exercises
         self.exercises_diff = self.game.current_data["Difficulty"]
@@ -433,6 +435,10 @@ class Level:
 
         self.exercises.append(ex)
 
+    def create_particles(self, sprite, color):
+        for i in range(sprite.rect.left, sprite.rect.right, 3):
+            self.particles.append([[i, sprite.rect.centery], [randint(0, 20) / 10 - 1, -2], randint(4, 12), color])
+
     def event_loop(self):
         events = pygame.event.get()
 
@@ -481,7 +487,18 @@ class Level:
             center_pos=True
         )
 
+        txt = Text(
+            text=f"Your Score: {self.score}!",
+            text_size=80,
+            start_pos=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 5 * TILE_SIZE),
+            text_color=COLORS["Text"],
+            groups=group,
+            center_pos=True
+        )
+
+        pygame.draw.line(self.game_over_screen, COLORS["Text"], txt.rect.bottomleft, txt.rect.bottomright, 3)
         group.draw(self.game_over_screen)
+
 
     def run(self):
 
@@ -519,15 +536,18 @@ class Level:
                     if self.player.rect.colliderect(sprite.rect):
                         if int(sprite.text) == eval(self.current_ex_to_jump[0].text[0:-2].replace("x", "*")):
                             self.set_answer_and_score(sprite, True)
+                            self.create_particles(sprite, COLORS["Particles Correct"])
                         else:
                             self.set_answer_and_score(sprite, False)
+                            self.create_particles(sprite, COLORS["Particles Error"])
+
 
                         for index, val in enumerate(self.exercises):
                             if val == self.current_ex_to_jump:
-                                if len(self.exercises) < index + 1:
-                                    self.current_ex_to_jump = self.exercises[index + 1]
-                                    break
-
+                                if len(self.exercises) > index + 1:
+                                    if self.exercises[index] == self.current_ex_to_jump:
+                                        self.current_ex_to_jump = self.exercises[index + 1]
+                                        break
                                 else:
                                     self.wait_mode = True
                                     break
@@ -548,6 +568,17 @@ class Level:
             # Level
             self.visible_sprites.draw(self.screen)
             self.player.draw()
+
+            # particles
+            for particle in self.particles:
+                particle[0][0] += particle[1][0]
+                particle[0][1] += particle[1][1]
+                particle[2] -= 0.1
+                particle[1][1] += 0.1
+                pygame.draw.circle(self.screen, particle[3], [int(particle[0][0]), int(particle[0][1])],
+                                   int(particle[2]))
+                if particle[2] <= 0:
+                    self.particles.remove(particle)
 
             # Decor
             pygame.draw.line(self.screen, COLORS["Text"], self.score_view.rect.bottomleft,
