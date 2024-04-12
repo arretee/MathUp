@@ -2,7 +2,7 @@ from settings import *
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, image, pos, groups, name = None):
+    def __init__(self, image, pos, groups, name=None):
         super().__init__(groups)
 
         self.name = name
