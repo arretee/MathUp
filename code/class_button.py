@@ -87,7 +87,7 @@ class ImageButton(pygame.sprite.Sprite):
         self.background_image.fill(self.main_color)
         self.background_rect = self.background_image.get_rect(topleft=(3, 3))
 
-        # text
+        # image
         self.img = pygame.image.load(image_path).convert_alpha()
         self.img = pygame.transform.scale(self.img, (self.size[0] - 6, self.size[1] - 6))
         self.img_rect = self.img.get_rect(center=(self.size[0] / 2, self.size[1] / 2))

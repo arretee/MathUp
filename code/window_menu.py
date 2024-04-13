@@ -186,8 +186,6 @@ class Menu:
             , func=self.game.exit
         )
 
-
-
         # ------------------------ Difficulty Text -------------------------------
         self.diff_text = Text(
             text="Difficulty",
@@ -246,10 +244,6 @@ class Menu:
         if self.game.current_data["Difficulty"] == 3:
             b3.select()
 
-
-
-
-
         # ------------------------ Speed Text -------------------------------
         self.speed_text = Text(
             text="Speed",
@@ -305,8 +299,6 @@ class Menu:
         )
         if self.game.current_data["Speed"] == 3:
             b3.select()
-
-
 
     def create_ex(self):
         x = randint(1, 10)
@@ -368,8 +360,6 @@ class Menu:
         else:
             diff = 3
 
-
-
         for sprite in self.difficulty_buttons:
             if sprite.text != select_button.text:
                 sprite.unselect()
@@ -377,8 +367,6 @@ class Menu:
                 sprite.select()
 
         self.game.current_data["Difficulty"] = diff
-
-
 
     def switch_speed(self, select_button):
         if select_button.text == "Slow":
@@ -395,7 +383,6 @@ class Menu:
                 sprite.select()
 
         self.game.current_data["Speed"] = speed
-
 
     def event_loop(self):
         self.update()
@@ -440,4 +427,5 @@ class Menu:
 
         # Music line (Off / On)
         if not self.game.music_status:
-            pygame.draw.line(self.screen, COLORS["Text"], self.sound_button.rect.topright, self.sound_button.rect.bottomleft, 5)
+            pygame.draw.line(self.screen, COLORS["Text"], self.sound_button.rect.topright,
+                             self.sound_button.rect.bottomleft, 5)

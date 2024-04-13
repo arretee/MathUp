@@ -499,7 +499,6 @@ class Level:
         pygame.draw.line(self.game_over_screen, COLORS["Text"], txt.rect.bottomleft, txt.rect.bottomright, 3)
         group.draw(self.game_over_screen)
 
-
     def run(self):
 
         if not self.game_over_status:
