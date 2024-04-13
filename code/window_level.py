@@ -383,7 +383,7 @@ class Level:
         exersice = self.create_ex_basic()
         ex = []
 
-        pos1 = [TILE_SIZE, -2 * TILE_SIZE] if len(f"{exersice[0]} {exersice[2]} {exersice[1]} =") <= 8 else [TILE_SIZE * 0.25, -2 * TILE_SIZE]
+        pos1 = [TILE_SIZE, -2 * TILE_SIZE - 1] if len(f"{exersice[0]} {exersice[2]} {exersice[1]} =") <= 8 else [TILE_SIZE * 0.25, -2 * TILE_SIZE - 1]
         ex.append(
             MovingText(
                 text=f"{exersice[0]} {exersice[2]} {exersice[1]} = ",
@@ -407,7 +407,7 @@ class Level:
             MovingText(
                 text=str(exersice[3]) + st,
                 text_size=60,
-                start_pos=[TILE_SIZE * 8, -2 * TILE_SIZE],
+                start_pos=[TILE_SIZE * 8, -2 * TILE_SIZE - 1],
                 y_change=self.blocks_speed,
                 text_color=COLORS["Text"],
                 groups=[self.visible_sprites, self.sprite_to_move]
@@ -426,7 +426,7 @@ class Level:
             MovingText(
                 text=st + str(exersice[4]),
                 text_size=60,
-                start_pos=[TILE_SIZE * 16, -2 * TILE_SIZE],
+                start_pos=[TILE_SIZE * 16, -2 * TILE_SIZE - 1],
                 y_change=self.blocks_speed,
                 text_color=COLORS["Text"],
                 groups=[self.visible_sprites, self.sprite_to_move]
@@ -514,8 +514,7 @@ class Level:
                             sprite.rect.y = -TILE_SIZE
 
                     else:
-                        if TILE_SIZE * (SCREEN_SIZE_IN_TILES[1] + int(
-                                SCREEN_SIZE_IN_TILES[1] / 3) - 1) - TILE_SIZE * 1 <= sprite.rect.y:
+                        if TILE_SIZE * (SCREEN_SIZE_IN_TILES[1] + int(SCREEN_SIZE_IN_TILES[1] / 3) - 1) - TILE_SIZE * 1 <= sprite.rect.y:
                             sprite.kill()
                             self.exercises[0].remove(sprite)
 
