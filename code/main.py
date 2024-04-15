@@ -11,6 +11,10 @@ from window_level import Level
 
 class Game:
     def __init__(self):
+        """
+        Creating the Game
+        """
+
         pygame.init()
         pygame.mixer.init()
 
@@ -36,6 +40,10 @@ class Game:
 
 
     def run(self):
+        """
+        Running the game
+        """
+
         while self.running:
             self.window.event_loop()
             self.window.run()
@@ -49,24 +57,42 @@ class Game:
         exit()
 
     def play_music(self):
+        """
+        Starting to play a Music
+        """
         pygame.mixer.music.play(-1)
         self.music_status = True
 
     def stop_music(self):
+        """
+        Stopping to play a Music
+        """
         pygame.mixer.music.stop()
         self.music_status = False
 
 
     def go_to_level(self):
+        """
+        Changing window to Level
+        """
         self.window = Level(self)
 
     def go_to_menu(self):
+        """
+        Changing window to Menu
+        """
         self.window = Menu(self)
 
     def restart_level(self):
+        """
+        Changing window to Level
+        """
         self.window = Level(self)
 
     def exit(self):
+        """
+        Closing The Game
+        """
         self.running = False
 
 

@@ -4,7 +4,19 @@ from settings import *
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, game, pos, collide_sprites):
+    def __init__(self, game, pos: tuple, collide_sprites):
+        """
+        Creating a player.
+        Inheritance from pygame.sprite.Sprite
+
+
+        :param game: Reference to Game object
+        :param pos: Player start position on screen -> (x, y)
+        :param collide_sprites: pygame.sprite.Group of all sprites to check collision with
+        """
+
+
+
         super().__init__()
         # Basic
         self.game = game
@@ -28,7 +40,15 @@ class Player(pygame.sprite.Sprite):
 
 
 
-    def event_loop(self, events):
+    def event_loop(self, events: list):
+        """
+        Getting all player input
+
+
+        :param events: list of events from type pygame.Event
+        """
+
+
         keys = pygame.key.get_pressed()
 
         for event in events:
@@ -55,23 +75,43 @@ class Player(pygame.sprite.Sprite):
             self.switch_stasuses()
 
     def jump(self):
+        """
+        Changing player y direction by JUMP_SPEED_BY_SPEED
+        """
         if self.onGround:
             self.onGround = False
             self.direction.y = JUMP_SPEED_BY_SPEED[self.game.current_data["Speed"]]
 
     def gravity(self):
+        """
+        Changing Gravity by GRAVITY
+        """
         if round(self.direction.y) == 0:
             self.direction.y = LEVEL_Y_BLOCKS_SPEED[self.game.current_data["Speed"]]
         self.direction.y += GRAVITY
 
-    def move(self, speed):
+    def move(self, speed: int):
+        """
+        Moving a player and checking collision with collide_sprites
+
+
+        :param speed: player horizontal speed (positive number = moving right)
+        """
+
         self.rect.y += int(self.direction.y)
         self.collision('vertical')
         self.rect.x += int(self.direction.x * speed)
         self.collision('horizontal')
 
 
-    def collision(self, direction):
+    def collision(self, direction: str):
+        """
+        Checking collision by direction with collide_sprites and changing player pos if player collide with sprites.
+
+
+        :param direction: getting direction of movement ( "horizontal" or "vertical" )
+        """
+
         if direction == 'horizontal':
             for sprite in self.collide_sprites:
                 if sprite.rect.colliderect(self.rect):
@@ -99,6 +139,9 @@ class Player(pygame.sprite.Sprite):
 
 
     def switch_stasuses(self):
+        """
+            Switching player View by status
+        """
         self.image = self.game.textures["Character"][self.status][0]
         self.rect = self.image.get_rect(center=self.rect.center)
 
@@ -106,6 +149,11 @@ class Player(pygame.sprite.Sprite):
         self.animation_index = 0
 
     def animate(self):
+        """
+            Animating the player
+        """
+
+
         self.animation_index += self.animation_speed
 
 
@@ -122,10 +170,20 @@ class Player(pygame.sprite.Sprite):
 
 
     def update(self, events):
+        """
+        Updating the player Data
+
+        :param events: list of events from type pygame.Event
+        """
+
         self.event_loop(events)
         self.animate()
         self.gravity()
         self.move(PLAYER_SPEED)
 
     def draw(self):
+        """
+        Drawing player on screen
+        """
+
         self.screen.blit(self.image, (self.rect.x, self.rect.y + 10))

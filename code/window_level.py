@@ -11,6 +11,12 @@ from settings import *
 
 class Level:
     def __init__(self, game):
+        """
+        Creating the Level Window and setup all the Variables
+
+
+        :param game: Main object Reference ( Game Object )
+        """
         # Basic
         self.game = game
         self.screen = self.game.screen
@@ -60,6 +66,9 @@ class Level:
 
 
     def setup(self):
+        """
+        Set up the View of Level
+        """
         # ----------------------- Decor --------------------------
         for i in range(21, SCREEN_SIZE_IN_TILES[0]):
             Tile(
@@ -229,12 +238,27 @@ class Level:
         )
 
     def switch_music(self):
+        """
+        Switching the Music by it current status.
+        Turning on if it was off and conversely.
+
+
+        """
         if self.game.music_status:
             self.game.stop_music()
         else:
             self.game.play_music()
 
-    def set_answer_and_score(self, txt_class, status):
+    def set_answer_and_score(self, txt_class, status: bool):
+        """
+        Changing the score and lives by status.
+        Changing the color of Text or MovingText class by stats
+
+
+        :param txt_class: MovingText or Text to change color by status (Status = True -> Green, Status = False -> Red)
+        :param status: Status of Player answer (True -> Correct, False -> Error)
+        """
+
         if status:
             self.score += 1
         else:
@@ -247,6 +271,12 @@ class Level:
         txt_class.change_color_to(COLORS["TextCorrect"] if status else COLORS["TextError"])
 
     def create_ex_basic(self):
+        """
+        Creating exercises by difficulty.
+
+        :return: List that represent exercises, only one of answers is correct. Structure -> [First_num, Second_num, math_operation, first_answer, second_answer]
+        """
+
         if self.exercises_diff == 1:
             x = randint(1, 10)
             y = randint(1, 10)
@@ -380,6 +410,11 @@ class Level:
             return [x, y, action_txt, first, second]
 
     def add_new_ex(self):
+        """
+        Adding new Exercises in self.exercises
+
+        Exercises is list of MovingText Views. Structure -> [MovingText(5+5=), MovingText(10), MovingText(15)]
+        """
         exersice = self.create_ex_basic()
         ex = []
 
@@ -435,11 +470,21 @@ class Level:
 
         self.exercises.append(ex)
 
-    def create_particles(self, sprite, color):
+    def create_particles(self, sprite, color: str):
+        """
+        Adding in to self.particles new particles next to sprite.
+
+
+        :param sprite: pygame.sprite.Sprite object.
+        :param color: Color of particles.
+        """
         for i in range(sprite.rect.left, sprite.rect.right, 3):
             self.particles.append([[i, sprite.rect.centery], [randint(0, 20) / 10 - 1, -2], randint(4, 12), color])
 
     def event_loop(self):
+        """
+        Get all player input on the level and update everything that depends on player input
+        """
         events = pygame.event.get()
 
         if not self.game_over_status:
@@ -467,6 +512,9 @@ class Level:
                     self.game.restart_level()
 
     def game_over(self):
+        """
+        Set up screen for Game Over in self.game_over_screen and setting game_over_status to True.
+        """
         self.game_over_status = True
         self.game_over_screen = self.screen.copy()
 
@@ -500,7 +548,9 @@ class Level:
         group.draw(self.game_over_screen)
 
     def run(self):
-
+        """
+        Updating everything that not depends on player input and drawing all sprites on screen.
+        """
         if not self.game_over_status:
             # Update
             self.buttons.update(pygame.mouse.get_pos())

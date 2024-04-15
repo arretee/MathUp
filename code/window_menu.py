@@ -8,6 +8,12 @@ from class_text import MovingText, Text
 
 class Menu:
     def __init__(self, game):
+        """
+        Creating the Menu Window and setup all the Variables
+
+
+        :param game: Main object Reference ( Game Object )
+        """
         # Basic
         self.game = game
         self.screen = self.game.screen
@@ -33,6 +39,9 @@ class Menu:
         self.setup()
 
     def setup(self):
+        """
+        Set up the View of Menu
+        """
         # -------------------------- Logo --------------------------
         self.logo_text = Text(
             text="Math Up!",
@@ -301,17 +310,21 @@ class Menu:
             b3.select()
 
     def create_ex(self):
+        """
+        Creating exercises by difficulty.
+
+        :return: List that represent exercises, only one of answers is correct. Structure -> [First_num, Second_num, math_operation, first_answer, second_answer]
+        """
+
         x = randint(1, 10)
         y = randint(1, 10)
 
-        action = randint(1, 3)
+        action = randint(1, 2)
         action_txt = ""
         if action == 1:
             action_txt = "+"
         if action == 2:
             action_txt = "-"
-        if action == 3:
-            action_txt = "x"
 
         if action == 2:
             if y > x:
@@ -325,11 +338,11 @@ class Menu:
             else:
                 first = x * y
 
-            incorrect = first + randint(-20, 20)
-            if incorrect == first:
-                second = first + randint(1, 20)
+            incorrect = first + randint(-5, 5)
+            if incorrect == first or incorrect < 0:
+                second = first + randint(1, 5)
             else:
-                second = first + randint(-20, 20)
+                second = incorrect
         else:
             if action == 1:
                 second = x + y
@@ -338,21 +351,32 @@ class Menu:
             else:
                 second = x * y
 
-            incorrect = second + randint(-20, 20)
-            if incorrect == second:
-                first = second + randint(1, 20)
+            incorrect = second + randint(-5, 5)
+            if incorrect == second or incorrect < 0:
+                first = second + randint(1, 5)
             else:
-                first = second + randint(-20, 20)
+                first = incorrect
 
         return [x, y, action_txt, first, second]
 
+
+
     def switch_music(self):
+        """
+        Switching the Music by it current status.
+        Turning on if it was off and conversely.
+        """
         if self.game.music_status:
             self.game.stop_music()
         else:
             self.game.play_music()
 
     def switch_difficulty(self, select_button):
+        """
+        Selecting only current button and changes the self.game.current_data["Difficulty"]
+
+        :param select_button: Button from type SelectButton that player clicked on.
+        """
         if select_button.text == "Easy":
             diff = 1
         elif select_button.text == "Mid":
@@ -369,6 +393,12 @@ class Menu:
         self.game.current_data["Difficulty"] = diff
 
     def switch_speed(self, select_button):
+        """
+        Selecting only current button and changes the self.game.current_data["Speed"]
+
+        :param select_button: Button from type SelectButton that player clicked on.
+        """
+
         if select_button.text == "Slow":
             speed = 1
         elif select_button.text == "Mid":
@@ -385,6 +415,10 @@ class Menu:
         self.game.current_data["Speed"] = speed
 
     def event_loop(self):
+        """
+        Get all user input on the level and update everything that depends on user input
+        """
+
         self.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -397,6 +431,9 @@ class Menu:
                         sprite.call_function()
 
     def update(self):
+        """
+        Updating everything that not depends on user input.
+        """
         self.tiles.update()
         for sprite in self.tiles.sprites():
             if TILE_SIZE * (SCREEN_SIZE_IN_TILES[1] + int(SCREEN_SIZE_IN_TILES[1] / 3) - 1) < sprite.rect.y:
@@ -411,6 +448,9 @@ class Menu:
         self.buttons.update(pygame.mouse.get_pos())
 
     def run(self):
+        """
+            drawing all sprites on screen.
+        """
         self.screen.fill(COLORS["BackGround"])
 
         # Line Under The logo

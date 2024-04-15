@@ -1,10 +1,10 @@
 import pygame
 
+
+# Global Values
 SCREEN_SIZE = [1280, 720]
 TILE_SIZE = int(SCREEN_SIZE[0] / 32)
 SCREEN_SIZE_IN_TILES = [int(SCREEN_SIZE[0] / TILE_SIZE), int(SCREEN_SIZE[1] / TILE_SIZE)]
-
-
 SCREEN_WIDTH, SCREEN_HEIGHT = SCREEN_SIZE
 
 COLORS = {
@@ -44,11 +44,11 @@ PATHS = {
     }
 }
 
+FONT_NAME = 'cambria'
 
 
 # Menu
 MENU_Y_BLOCKS_SPEED = 1
-FONT_NAME = 'cambria'
 
 # Level
 LEVEL_Y_BLOCKS_SPEED = {
