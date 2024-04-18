@@ -24,6 +24,9 @@ COLORS = {
 
     "Particles Correct": "#6DFF2F",
     "Particles Error": "#F01010",
+
+    "Circle Main": "#594e7a",
+    "Circle Border": "gray1",
 }
 
 PATHS = {
@@ -63,5 +66,10 @@ JUMP_SPEED_BY_SPEED = {
     1: -10,
     2: -9,
     3: -8.5
+}
+DOUBLE_JUMP_SPEED_BY_SPEED = {
+    1: -5,
+    2: -4.75,
+    3: -4.25
 }
 ANIMATION_SPEED = 0.08

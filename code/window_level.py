@@ -42,6 +42,7 @@ class Level:
         # Exercises
         self.exercises_diff = self.game.current_data["Difficulty"]
         self.exercises = []
+        self.wrong_answers = []
         self.setup()
 
         self.current_ex_to_jump = self.exercises[2]
@@ -63,6 +64,14 @@ class Level:
 
         # Player
         self.player = Player(self.game, (TILE_SIZE * 13.5, TILE_SIZE * 11), self.collide_sprites)
+
+
+        # MiniGame
+        self.minigame_status = False
+        self.minigame_circle_data = {
+            "Center": self.player.rect.center,
+            "Radius": SCREEN_WIDTH
+        }
 
 
     def setup(self):
@@ -121,19 +130,22 @@ class Level:
             )
 
         # Platforms
+        plat_size = (TILE_SIZE, TILE_SIZE/8)
         for i in [0, 6, 12, 18]:
             MovingTile(
                 image=self.game.textures["Textures"]["platforms"][0],
                 pos=[TILE_SIZE * 7, i * TILE_SIZE],
                 y_change=self.blocks_speed,
-                groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move]
+                groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move],
+                size=plat_size
             )
 
             MovingTile(
                 image=self.game.textures["Textures"]["platforms"][2],
                 pos=[TILE_SIZE * 19, i * TILE_SIZE],
                 y_change=self.blocks_speed,
-                groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move]
+                groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move],
+                size=plat_size
             )
 
             for j in [8, 9, 10, 16, 17, 18]:
@@ -141,7 +153,8 @@ class Level:
                     image=self.game.textures["Textures"]["platforms"][1],
                     pos=[TILE_SIZE * j, i * TILE_SIZE],
                     y_change=self.blocks_speed,
-                    groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move]
+                    groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move],
+                    size=plat_size
                 )
 
         # Start Platform
@@ -150,7 +163,9 @@ class Level:
                 image=self.game.textures["Textures"]["platforms"][1],
                 pos=[TILE_SIZE * i, SCREEN_SIZE_IN_TILES[1] * TILE_SIZE - TILE_SIZE * 6],
                 y_change=self.blocks_speed,
-                groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move, self.start_platform_sprites]
+                groups=[self.collide_sprites, self.visible_sprites, self.sprite_to_move, self.start_platform_sprites],
+                size=plat_size
+
             )
 
         # Exercises
@@ -166,7 +181,7 @@ class Level:
                     start_pos=pos1,
                     y_change=self.blocks_speed,
                     text_color=COLORS["Text"],
-                    groups=[self.visible_sprites, self.sprite_to_move]
+                    groups=[self.visible_sprites, self.sprite_to_move] if i < 12 else [self.sprite_to_move]
                 )
             )
 
@@ -185,7 +200,7 @@ class Level:
                     start_pos=[TILE_SIZE * 8, -2 * TILE_SIZE + TILE_SIZE * i],
                     y_change=self.blocks_speed,
                     text_color=COLORS["Text"],
-                    groups=[self.visible_sprites, self.sprite_to_move]
+                    groups=[self.visible_sprites, self.sprite_to_move] if i < 12 else [self.sprite_to_move]
                 )
             )
 
@@ -204,7 +219,7 @@ class Level:
                     start_pos=[TILE_SIZE * 16, -2 * TILE_SIZE + TILE_SIZE * i],
                     y_change=self.blocks_speed,
                     text_color=COLORS["Text"],
-                    groups=[self.visible_sprites, self.sprite_to_move]
+                    groups=[self.visible_sprites, self.sprite_to_move] if i < 12 else [self.sprite_to_move]
                 )
             )
 
@@ -487,7 +502,8 @@ class Level:
         """
         events = pygame.event.get()
 
-        if not self.game_over_status:
+        # Level
+        if not self.game_over_status and not self.minigame_status:
             self.player.update(events)
 
             for event in events:
@@ -503,6 +519,12 @@ class Level:
                         if sprite.rect.collidepoint(mouse_pos):
                             sprite.call_function()
 
+        elif self.minigame_status:
+            for event in events:
+                if event.type == pygame.QUIT:
+                    self.game.running = False
+
+        # Game over
         else:
             for event in events:
                 if event.type == pygame.QUIT:
@@ -519,17 +541,17 @@ class Level:
         self.game_over_screen = self.screen.copy()
 
         # dark background
-        darken_percent = 0.50
+        darken_percent = 0.75
         dark = pygame.Surface(self.game_over_screen.get_size()).convert_alpha()
         dark.fill((0, 0, 0, darken_percent * 255))
         self.game_over_screen.blit(dark, (0, 0))
 
         # Text
         group = pygame.sprite.Group()
-        txt = Text(
+        Text(
             text="Press any button to restart",
-            text_size=80,
-            start_pos=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2),
+            text_size=30,
+            start_pos=(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 1.5 * TILE_SIZE),
             text_color=COLORS["Text"],
             groups=group,
             center_pos=True
@@ -538,20 +560,92 @@ class Level:
         txt = Text(
             text=f"Your Score: {self.score}!",
             text_size=80,
-            start_pos=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 5 * TILE_SIZE),
+            start_pos=(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 6 * TILE_SIZE),
             text_color=COLORS["Text"],
             groups=group,
             center_pos=True
         )
 
+
+        if len(self.wrong_answers):
+            ex_text_pos = (SCREEN_WIDTH / 2 - 8 * TILE_SIZE, SCREEN_HEIGHT / 2 - 4 * TILE_SIZE)
+            ex_txt = Text(
+                text="Exercise",
+                text_size=50,
+                start_pos=ex_text_pos,
+                text_color=COLORS["Text"],
+                groups=group,
+            )
+            pygame.draw.line(self.game_over_screen, COLORS["Text"], ex_txt.rect.bottomleft, ex_txt.rect.bottomright, 3)
+
+            wrong_text_pos = (SCREEN_WIDTH / 2 - TILE_SIZE, SCREEN_HEIGHT / 2 - 4 * TILE_SIZE)
+            wrong_txt = Text(
+                text="Wrong",
+                text_size=50,
+                start_pos=[wrong_text_pos[0], wrong_text_pos[1]],
+                text_color=COLORS["Text"],
+                groups=group,
+            )
+            pygame.draw.line(self.game_over_screen, COLORS["Text"], wrong_txt.rect.bottomleft, wrong_txt.rect.bottomright, 3)
+
+
+            correct_txt_pos = (SCREEN_WIDTH / 2 + 4 * TILE_SIZE, SCREEN_HEIGHT / 2 - 4 * TILE_SIZE)
+            wrong_txt = Text(
+                text="Correct",
+                text_size=50,
+                start_pos=[correct_txt_pos[0], correct_txt_pos[1]],
+                text_color=COLORS["Text"],
+                groups=group,
+            )
+            pygame.draw.line(self.game_over_screen, COLORS["Text"], wrong_txt.rect.bottomleft,
+                             wrong_txt.rect.bottomright, 3)
+
+            for index, wrong in enumerate(self.wrong_answers):
+                # Exercises
+                Text(
+                    text=wrong[0],
+                    text_size=50,
+                    start_pos= (ex_text_pos[0], ex_text_pos[1] + 2.5 * TILE_SIZE + 1.5 * TILE_SIZE * index),
+                    text_color=COLORS["Text"],
+                    groups=group,
+                )
+
+                # Wrong Answers
+                Text(
+                    text=wrong[1].strip(),
+                    text_size=50,
+                    start_pos=[wrong_text_pos[0], wrong_text_pos[1] + 2.5 * TILE_SIZE + 1.5 * TILE_SIZE * index],
+                    text_color=COLORS["TextError"],
+                    groups=group,
+                )
+
+                # Wrong Answers
+                t = Text(
+                    text=wrong[2].strip(),
+                    text_size=50,
+                    start_pos=[correct_txt_pos[0], correct_txt_pos[1] + 2.5 * TILE_SIZE + 1.5 * TILE_SIZE * index],
+                    text_color=COLORS["TextCorrect"],
+                    groups=group,
+                )
+
+
+
         pygame.draw.line(self.game_over_screen, COLORS["Text"], txt.rect.bottomleft, txt.rect.bottomright, 3)
         group.draw(self.game_over_screen)
+
+    def reset_minigame(self):
+        self.minigame_status = False
+        self.minigame_circle_data = {
+            "Center": self.player.rect.center,
+            "Radius": SCREEN_WIDTH
+        }
+
 
     def run(self):
         """
         Updating everything that not depends on player input and drawing all sprites on screen.
         """
-        if not self.game_over_status:
+        if not self.game_over_status and not self.minigame_status:
             # Update
             self.buttons.update(pygame.mouse.get_pos())
 
@@ -586,6 +680,11 @@ class Level:
                             self.set_answer_and_score(sprite, True)
                             self.create_particles(sprite, COLORS["Particles Correct"])
                         else:
+                            self.wrong_answers.append([
+                                self.current_ex_to_jump[0].text,
+                                self.current_ex_to_jump[1].text if sprite == self.current_ex_to_jump[1] else self.current_ex_to_jump[2].text,
+                                self.current_ex_to_jump[2].text if sprite != self.current_ex_to_jump[2] else self.current_ex_to_jump[1].text,
+                            ])
                             self.set_answer_and_score(sprite, False)
                             self.create_particles(sprite, COLORS["Particles Error"])
 
@@ -637,5 +736,34 @@ class Level:
                                  self.sound_button.rect.bottomleft, 5)
 
 
+
+            # Create MiniGame
+            if self.score % 10 == 0 and self.score != 0:
+                if self.player.rect.centerx > 13.5 * TILE_SIZE:
+                    self.player.rect.centerx = 17 * TILE_SIZE
+                else:
+                    self.player.rect.centerx = 10 * TILE_SIZE
+
+
+                self.minigame_status = True
+
+                self.minigame_circle_data = {
+                    "Center": self.player.rect.center,
+                    "Radius": SCREEN_WIDTH
+                }
+
+        elif self.minigame_status:
+            if self.minigame_circle_data["Radius"] > 50:
+                txt = pygame.font.SysFont(FONT_NAME, 150).render(str("Mini Game !!"), True, COLORS["Text"])
+                txt_rect = txt.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+                pygame.draw.circle(self.screen, "Black", self.minigame_circle_data["Center"], self.minigame_circle_data["Radius"], 50)
+
+                self.screen.blit(
+                    txt, txt_rect
+                )
+                self.minigame_circle_data["Radius"] *= 0.98
+            else:
+
+                self.game.go_to_minigame()
         else:
             self.screen.blit(self.game_over_screen, (0, 0))

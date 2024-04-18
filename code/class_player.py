@@ -28,6 +28,7 @@ class Player(pygame.sprite.Sprite):
         self.status = "idle"
         self.facing = "left"
         self.onGround = False
+        self.double_jump = True
 
         # Animations
         self.animation_index = 0
@@ -54,7 +55,7 @@ class Player(pygame.sprite.Sprite):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 # Jump
-                if (event.key == pygame.K_SPACE or event.key == pygame.K_UP or event.key == pygame.K_w) and self.onGround:
+                if (event.key == pygame.K_SPACE or event.key == pygame.K_UP or event.key == pygame.K_w) and (self.onGround or self.double_jump):
                     self.jump()
 
         # Movement
@@ -76,11 +77,17 @@ class Player(pygame.sprite.Sprite):
 
     def jump(self):
         """
-        Changing player y direction by JUMP_SPEED_BY_SPEED
+        Changing player y direction by JUMP_SPEED_BY_SPEED or double jump
         """
         if self.onGround:
             self.onGround = False
+            self.double_jump = True
             self.direction.y = JUMP_SPEED_BY_SPEED[self.game.current_data["Speed"]]
+        elif self.double_jump:
+            self.double_jump = False
+            self.direction.y = DOUBLE_JUMP_SPEED_BY_SPEED[self.game.current_data["Speed"]]
+
+
 
     def gravity(self):
         """
@@ -132,6 +139,7 @@ class Player(pygame.sprite.Sprite):
                         self.rect.bottom = sprite.rect.top
                         self.direction.y = 0
                         self.onGround = True
+                        self.double_jump = False
 
                     elif self.direction.y < 0:
                         self.direction.y = 0

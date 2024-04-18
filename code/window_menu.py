@@ -359,8 +359,6 @@ class Menu:
 
         return [x, y, action_txt, first, second]
 
-
-
     def switch_music(self):
         """
         Switching the Music by it current status.

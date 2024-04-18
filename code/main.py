@@ -5,6 +5,7 @@ from sys import exit
 
 from support_functions import import_images
 
+from window_minigame import MiniGame
 from window_menu import Menu
 from window_level import Level
 
@@ -24,7 +25,7 @@ class Game:
 
         self.music_status = True
         pygame.mixer.music.load("../sound/main_music.mp3")
-        pygame.mixer.music.set_volume(0.1)
+        pygame.mixer.music.set_volume(0.5)
 
         self.textures = import_images()
         self.running = True
@@ -36,6 +37,7 @@ class Game:
         }
         self.window = Menu(self)
 
+        self.level_save = None
 
 
 
@@ -88,6 +90,27 @@ class Game:
         Changing window to Level
         """
         self.window = Level(self)
+
+    def go_to_minigame(self):
+        """
+        Changing window to MiniGame and saving to Level
+        """
+
+        self.level_save = self.window
+        self.window = MiniGame(self)
+
+    def back_to_level(self, score):
+        self.window = self.level_save
+        if score > 0:
+            self.window.score += score
+        else:
+            self.window.score += 1
+            self.window.lives -= 1
+
+        self.window.score_view.change_text(f"Score : {self.window.score}")
+        self.window.lives_view.change_text(f"Lives : {self.window.lives}")
+
+        self.window.reset_minigame()
 
     def exit(self):
         """
